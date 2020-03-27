@@ -1,8 +1,22 @@
 @echo off
-REM Set the path of backup files
+REM Set the path of backup files. the below line MUST BE at line 3. the installer changes its content
 SET backupFolder=D:\Data\Backup
+
+if "%1" == "-i" GOTO Install
+if "%1" == "-I" GOTO Install
+if "%1" == "-b" GOTO Backup
+if "%1" == "-B" GOTO Backup
+REM else show help
+GOTO Help
+
+
+
+
+REM ***************************************************************************************************************************************
+REM ***************************************************************************************************************************************
+:Backup
 REM get name of folder that we want to backup. the folder name will be the name of backup file
-for %%I in (%1) do set FolderName=%%~nxI
+for %%I in (%2) do set FolderName=%%~nxI
 REM get folder of this batch file. it is used to create temporary files and spinner batch file
 SET rootPath=%~dp0
 
@@ -20,9 +34,6 @@ echo exit
 )>%rootPath%spinner.bat
 
 
-
-
-
 echo.
 echo.
 echo.
@@ -38,24 +49,11 @@ echo  P"Ybmmd" .JMML..JMML  JMML  JMML. MMbmmd'.JMML.`Mbmmd'     .JMMmmmd9  `Moo
 echo                                    MM                                                                        MM       
 echo                                  .JMML.                                                                    .JMML.  
 
-
-
-
-
-
-
-
-
-
-
-
-
-
 REM Run spinner
 <nul set /p ="Backup in progress"
 start /b %rootPath%spinner.bat
 REM Run winrar to compress folder with my rule
-%rootPath%Rar.exe a -r -k -idq -m5 -rr5p -s -ag[YYYY-MM-DD]N "%backupFolder%\%FolderName%" %1
+%rootPath%Rar.exe a -r -k -idq -m5 -rr5p -s -ag[YYYY-MM-DD]N "%backupFolder%\%FolderName%" %2
 
 REM After finishing rar. creating a temporary file. this tells to spinner to finsh its job
 echo "Mehrsoft">%rootPath%stopslash.dat
@@ -70,3 +68,30 @@ echo                                  **          Backup Finished!          **
 echo                                  ****************************************
 timeout 2 >nul
 exit
+
+goto END
+
+
+
+
+REM ***************************************************************************************************************************************
+REM ***************************************************************************************************************************************
+:Install
+
+
+goto END
+
+
+
+REM ***************************************************************************************************************************************
+REM ***************************************************************************************************************************************
+:Help
+echo %0 %*
+echo Usage: backup.bat [Switches] [Path]
+echo   Switches:
+echo     -b: do backup of the folder Path
+echo     -i: install backup utility in windows registry. so you can back up any folder by right click on it and select "Backup"
+echo.
+echo Backup example: Backup.bat -b "C:\Data"
+echo   It will backup folder "C:\Data"
+:END
