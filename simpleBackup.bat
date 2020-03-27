@@ -1,6 +1,11 @@
 @echo off
-REM Set the path of backup files. the below line MUST BE at line 3. the installer changes its content
+
+REM Set the path of backup files. the below line MUST BE at line 4. the installer will change its content
 SET backupFolder=D:\Data\Backup
+REM get folder of this batch file. it is used to create temporary files and spinner batch file
+SET rootPath=%~dp0
+
+
 
 if "%1" == "-i" GOTO Install
 if "%1" == "-I" GOTO Install
@@ -17,8 +22,7 @@ REM ****************************************************************************
 :Backup
 REM get name of folder that we want to backup. the folder name will be the name of backup file
 for %%I in (%2) do set FolderName=%%~nxI
-REM get folder of this batch file. it is used to create temporary files and spinner batch file
-SET rootPath=%~dp0
+
 
 REM content of spinner batch file
 (
@@ -52,10 +56,10 @@ echo                                  .JMML.                                    
 REM Run spinner
 <nul set /p ="Backup in progress"
 start /b %rootPath%spinner.bat
-REM Run winrar to compress folder with my rule
+REM Run WinRAR to compress folder with my rule
 %rootPath%Rar.exe a -r -k -idq -m5 -rr5p -s -ag[YYYY-MM-DD]N "%backupFolder%\%FolderName%" %2
 
-REM After finishing rar. creating a temporary file. this tells to spinner to finsh its job
+REM After finishing Rar.exe, creating a temporary file. this tells to spinner to finsh its job
 echo "Mehrsoft">%rootPath%stopslash.dat
 :waitdel
 REM Waiting to spinner.bat to delete temporary file and exit
