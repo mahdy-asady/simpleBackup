@@ -1,4 +1,5 @@
 @echo off
+CLS&color
 setlocal
 :: Set the path of backup files. the below line MUST BE at line 4. the installer will change its content
 SET backupBankFolder=D:\Data\Backup
@@ -30,18 +31,34 @@ echo  Mb     dM  MM    MM    MM    MM   MM   ,AP MM YM.    ,       MM    ,9 8M  
 echo  P"Ybmmd" .JMML..JMML  JMML  JMML. MMbmmd'.JMML.`Mbmmd'     .JMMmmmd9  `Moo9^Yo.YMbmd'.JMML. YA.  `Mbod"YML. MMbmmd'  
 echo                                    MM                                                                        MM       
 echo                                  .JMML.                                                                    .JMML.  
-:: TODO: First check if backupBankFolder exists. if not show error and tell user to run installer
+:: First check if backupBankFolder exists. if not show error and tell user to run installer
+if not exist %backupBankFolder%\ (
+  echo:
+  echo                            ****************************************************************
+  echo                            **                           Error!                           **
+  echo                            ** Bank folder not exist. Please run "simpleBackup -i" first. **
+  echo                            ****************************************************************
+  setlocal enableextensions enabledelayedexpansion
+  for /l %%i in (1,1,7) do (
+    set /A r = %%i%%2
+	if !r! EQU 0 color 4
+	if !r! EQU 1 color 7
+    timeout 1 >nul
+  )
+  endlocal
+  GOTO END
+)
 :: content of spinner batch file
 (
-echo @echo off
-echo if exist stopslash.dat del stopslash.dat
-echo :start
-echo ^<nul set /p ="."
-echo timeout 2 ^>nul
-echo if exist %rootPath%stopslash.dat del %rootPath%stopslash.dat^&goto endfile
-echo goto start
-echo :endfile
-echo exit
+  echo @echo off
+  echo if exist stopslash.dat del stopslash.dat
+  echo :start
+  echo ^<nul set /p ="."
+  echo timeout 2 ^>nul
+  echo if exist %rootPath%stopslash.dat del %rootPath%stopslash.dat^&goto endfile
+  echo goto start
+  echo :endfile
+  echo exit
 )>%rootPath%spinner.bat
 :: Run spinner
 <nul set /p ="Backup in progress"
@@ -54,11 +71,11 @@ echo "Mehrsoft">%rootPath%stopslash.dat
 :: Waiting to spinner.bat to delete temporary file and exit
 if exist %rootPath%stopslash.dat goto waitdel
 del %rootPath%spinner.bat
+color 2
 echo:
-echo                                  ****************************************
-echo                                  **          Backup Finished!          **
-echo                                  ****************************************
-timeout 2 >nul
+echo                                        ****************************************
+echo                                        **          Backup Finished!          **
+echo                                        ****************************************
 goto END
 :: ***************************************************************************************************************************************
 :: ***************************************************************************************************************************************
@@ -72,15 +89,15 @@ set tempBankFolder=
 set /P tempBankFolder="Bank Folder: "
 if "%tempBankFolder%" == "" set tempBankFolder=%backupBankFolder%
 if not exist %tempBankFolder%\ (
-	echo Error! folder not exist. Enter correct one.
-	GOTO getPath
+  echo Error! folder not exist. Enter correct one.
+  GOTO getPath
 )
-:: edit line 3 of current batch file
+:: edit line 5 of current batch file
 setlocal enableextensions enabledelayedexpansion
 set /A i=0
 for /f "delims=" %%f in ('type "%0"^&cd.^>"%0"') do (
   set /A i+=1
-  if !i! EQU 4 (
+  if !i! EQU 5 (
     echo SET backupBankFolder=%tempBankFolder%>>%0
   ) else (
 	Setlocal DisableDelayedExpansion
@@ -92,12 +109,12 @@ endlocal
 :: add to Registry
 reg add HKCR\Directory\shell\Backup /v icon /f /d "%%systemroot%%\system32\setupapi.dll,46">NUL
 reg add HKCR\Directory\shell\Backup\command /ve /f /d "%~f0 -b ""%%1""">NUL
+color 2
 echo:
-echo                          ******************************************************************************
-echo                          **                           Software Installed!                            **
-echo                          ** Now you can right click on every folder that you want and click "Backup" **
-echo                          ******************************************************************************
-timeout 2 >nul
+echo               ******************************************************************************
+echo               **                           Software Installed!                            **
+echo               ** Now you can right click on every folder that you want and click "Backup" **
+echo               ******************************************************************************
 GOTO END
 :: ***************************************************************************************************************************************
 :: ***************************************************************************************************************************************
@@ -111,4 +128,6 @@ echo:
 echo Backup example: Backup.bat -b "C:\Data"
 echo   It will backup folder "C:\Data"
 :END
+timeout 2 >nul
+color
 endlocal
