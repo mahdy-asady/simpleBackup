@@ -53,11 +53,14 @@ if not exist %backupBankFolder%\ (
   endlocal
   GOTO EndTimeout
 )
+set tmpfile=%time::=%
+set tmpfile=%tmpfile: =%
+set tmpfile=%tmpfile:.=%
 :: content of spinner batch file
 (
   echo @echo off
   echo setlocal EnableDelayedExpansion
-  echo if exist stopslash.dat del stopslash.dat
+  echo if exist stopslash%tmpfile%.dat del stopslash%tmpfile%.dat
   echo SET i=0
   echo SET "spinChars=\|/-"
   echo :start
@@ -67,23 +70,23 @@ if not exist %backupBankFolder%\ (
   echo IF [%%r1%%]==[0] ^<nul set /p ="."
   echo TITLE Back up in progress !spinChars:~%%spinner%%,1!
   echo pathping localhost -n -q 1 -p 50 ^>nul
-  echo if exist %rootPath%stopslash.dat del %rootPath%stopslash.dat^&goto endfile
+  echo if exist %rootPath%stopslash%tmpfile%.dat del %rootPath%stopslash%tmpfile%.dat^&goto endfile
   echo goto start
   echo :endfile
   echo endlocal
   echo exit
-)>%rootPath%spinner.bat
+)>%rootPath%spinner%tmpfile%.bat
 :: Run spinner
 <nul set /p ="Backup in progress"
-start /b %rootPath%spinner.bat
+start /b %rootPath%spinner%tmpfile%.bat
 :: Run WinRAR to compress folder with my rule
 %rootPath%Rar.exe a -r -k -idq -m5 -rr5p -s -ag[YYYY-MM-DD]N "%backupBankFolder%\%FolderName%" %2
 :: After finishing Rar.exe, creating a temporary file. this tells to spinner to finsh its job
-echo "Mehrsoft">%rootPath%stopslash.dat
+echo "Mahdy Asady">%rootPath%stopslash%tmpfile%.dat
 :waitdel
 :: Waiting to spinner.bat to delete temporary file and exit
-if exist %rootPath%stopslash.dat goto waitdel
-del %rootPath%spinner.bat
+if exist %rootPath%stopslash%tmpfile%.dat goto waitdel
+del %rootPath%spinner%tmpfile%.bat
 TITLE SimpleBackup
 color 2
 echo:
