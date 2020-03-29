@@ -2,11 +2,11 @@
 if NOT "%1" == "-u" (
   CLS
   color
-  title "Backup"
+  title "SimpleBackup"
 )
 setlocal
 :: Set the path of backup files. the below line MUST BE at line 4. the installer will change its content
-SET backupBankFolder=d:\backup2
+SET backupBankFolder=D:\Backup
 :: get folder of this batch file. it is used to create temporary files and spinner batch file
 SET rootPath=%~dp0
 :: process arguments
@@ -56,13 +56,21 @@ if not exist %backupBankFolder%\ (
 :: content of spinner batch file
 (
   echo @echo off
+  echo setlocal EnableDelayedExpansion
   echo if exist stopslash.dat del stopslash.dat
+  echo SET i=0
+  echo SET "spinChars=\|/-"
   echo :start
-  echo ^<nul set /p ="."
-  echo timeout 2 ^>nul
+  echo SET /A i+=1
+  echo SET /A r1=i%%%%40
+  echo SET /A spinner=i%%%%4
+  echo IF [%%r1%%]==[0] ^<nul set /p ="."
+  echo TITLE Back up in progress !spinChars:~%%spinner%%,1!
+  echo pathping localhost -n -q 1 -p 50 ^>nul
   echo if exist %rootPath%stopslash.dat del %rootPath%stopslash.dat^&goto endfile
   echo goto start
   echo :endfile
+  echo endlocal
   echo exit
 )>%rootPath%spinner.bat
 :: Run spinner
@@ -76,6 +84,7 @@ echo "Mehrsoft">%rootPath%stopslash.dat
 :: Waiting to spinner.bat to delete temporary file and exit
 if exist %rootPath%stopslash.dat goto waitdel
 del %rootPath%spinner.bat
+TITLE SimpleBackup
 color 2
 echo:
 echo                                        ****************************************
@@ -85,7 +94,7 @@ goto EndTimeout
 :: ***************************************************************************************************************************************
 :: ***************************************************************************************************************************************
 :Install
-echo simpleBackup Installer
+echo SimpleBackup Installer
 echo Please enter path of backup Bank folder. all your backups will save at this folder.
 echo Current path is "%backupBankFolder%". If it is ok then just press Enter. otherwise type your path.
 echo Note that the trailing slash should be removed.
@@ -141,12 +150,12 @@ GOTO END
 :: ***************************************************************************************************************************************
 :Help
 echo %0 %*
-echo Usage: backup.bat [Switches] [Path]
+echo Usage: simpleBackup.bat [Switches] [Path]
 echo   Switches:
 echo     -b: do backup of the folder Path
 echo     -i: install backup utility in windows registry. so you can back up any folder by right click on it and select "Backup"
 echo:
-echo Backup example: Backup.bat -b "C:\Data"
+echo Backup example: simpleBackup.bat -b "C:\Data"
 echo   It will backup folder "C:\Data"
 :EndTimeout
 timeout 2 >nul
