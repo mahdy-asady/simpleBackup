@@ -1,3 +1,6 @@
+::SimpleBackup is a simple batch script to backup my projects using rar.
+::for some reason I need lightweight backup software that backup my projects when I want. then I started creating it for myself usage
+::you can find me at https://github.com/mahdy-asady
 @echo off
 if NOT "%1" == "-u" (
   CLS
@@ -53,6 +56,8 @@ if not exist %backupBankFolder%\ (
   endlocal
   GOTO EndTimeout
 )
+::create a temporary name based on current time to append to spinner and its stoper file
+::it enables more than one backup jobs at the same time
 set tmpfile=%time::=%
 set tmpfile=%tmpfile: =%
 set tmpfile=%tmpfile:.=%
@@ -145,7 +150,9 @@ GOTO END
 :: ***************************************************************************************************************************************
 :: ***************************************************************************************************************************************
 :delUpdateFile
+::delete updater.bat file after modification of simpleBackup.bat
 color 2
+:: this timeout is just for finishing updater.bat file
 timeout 1 >nul
 del %rootPath%updater.bat
 GOTO END
