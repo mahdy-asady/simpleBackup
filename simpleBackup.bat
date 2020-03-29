@@ -73,7 +73,9 @@ set tmpfile=%tmpfile:.=%
   echo SET /A r1=i%%%%40
   echo SET /A spinner=i%%%%4
   echo IF [%%r1%%]==[0] ^<nul set /p ="."
-  echo TITLE Back up in progress !spinChars:~%%spinner%%,1!
+  echo SET dots=
+  echo FOR /L %%%%t IN ^(10,10,40^) do ^(IF %%%%t LEQ %%r1%% ^(SET dots=!dots!.^) ELSE ^(SET "dots=!dots! "^)^)
+  echo TITLE [%FolderName%] Backup in progress!dots! !spinChars:~%%spinner%%,1!
   echo pathping localhost -n -q 1 -p 50 ^>nul
   echo if exist %rootPath%stopslash%tmpfile%.dat del %rootPath%stopslash%tmpfile%.dat^&goto endfile
   echo goto start
@@ -82,7 +84,7 @@ set tmpfile=%tmpfile:.=%
   echo exit
 )>%rootPath%spinner%tmpfile%.bat
 :: Run spinner
-<nul set /p ="Backup in progress"
+<nul set /p ="Backup in progress [%FolderName%] "
 start /b %rootPath%spinner%tmpfile%.bat
 :: Run WinRAR to compress folder with my rule
 %rootPath%Rar.exe a -r -k -idq -m5 -rr5p -s -ag[YYYY-MM-DD]N "%backupBankFolder%\%FolderName%" %2
