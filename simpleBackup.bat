@@ -1,13 +1,18 @@
 @echo off
-CLS&color
+if NOT "%1" == "-u" (
+  CLS
+  color
+  title "Backup"
+)
 setlocal
 :: Set the path of backup files. the below line MUST BE at line 4. the installer will change its content
-SET backupBankFolder=D:\Data\Backup
+SET backupBankFolder=d:\backup2
 :: get folder of this batch file. it is used to create temporary files and spinner batch file
 SET rootPath=%~dp0
 :: process arguments
 if "%1" == "-i" GOTO Install
 if "%1" == "-I" GOTO Install
+if "%1" == "-u" GOTO delUpdateFile
 if "%1" == "-b" GOTO Backup
 if "%1" == "-B" GOTO Backup
 :: else show help
@@ -46,7 +51,7 @@ if not exist %backupBankFolder%\ (
     timeout 1 >nul
   )
   endlocal
-  GOTO END
+  GOTO EndTimeout
 )
 :: content of spinner batch file
 (
@@ -76,7 +81,7 @@ echo:
 echo                                        ****************************************
 echo                                        **          Backup Finished!          **
 echo                                        ****************************************
-goto END
+goto EndTimeout
 :: ***************************************************************************************************************************************
 :: ***************************************************************************************************************************************
 :Install
@@ -92,29 +97,45 @@ if not exist %tempBankFolder%\ (
   echo Error! folder not exist. Enter correct one.
   GOTO getPath
 )
-:: edit line 5 of current batch file
-setlocal enableextensions enabledelayedexpansion
-set /A i=0
-for /f "delims=" %%f in ('type "%0"^&cd.^>"%0"') do (
-  set /A i+=1
-  if !i! EQU 5 (
-    echo SET backupBankFolder=%tempBankFolder%>>%0
-  ) else (
-	Setlocal DisableDelayedExpansion
-      echo %%f>>%0
-	Endlocal
-  )
-)
-endlocal
 :: add to Registry
 reg add HKCR\Directory\shell\Backup /v icon /f /d "%%systemroot%%\system32\setupapi.dll,46">NUL
 reg add HKCR\Directory\shell\Backup\command /ve /f /d "%~f0 -b ""%%1""">NUL
+:: edit line 9 of current batch file
+:: content of updater batch file
+(
+  echo @echo off
+  echo setlocal enableextensions enabledelayedexpansion
+  echo set /A i=0
+  echo for /f "delims=" %%%%f in ^('type "%%1"^^^&cd.^^^>"%%1"'^) do (
+  echo   set /A i+=1
+  echo   if !i! EQU 9 ^(
+  echo     echo SET backupBankFolder=%tempBankFolder%^>^>%%1
+  echo   ^) else ^(
+  echo 	Setlocal DisableDelayedExpansion
+  echo       echo %%%%f^>^>%%1
+  echo 	Endlocal
+  echo   ^)
+  echo ^)
+  echo endlocal
+  echo CLS
+  echo echo:
+  echo echo               ******************************************************************************
+  echo echo               **                           Software Installed!                            **
+  echo echo               ** Now you can right click on every folder that you want and click "Backup" **
+  echo echo               ******************************************************************************
+  echo start /b %0 -u
+  echo exit
+)>%rootPath%updater.bat
+:: Run updater
+start "Updater" /b %rootPath%updater.bat %0
+exit
+GOTO END
+:: ***************************************************************************************************************************************
+:: ***************************************************************************************************************************************
+:delUpdateFile
 color 2
-echo:
-echo               ******************************************************************************
-echo               **                           Software Installed!                            **
-echo               ** Now you can right click on every folder that you want and click "Backup" **
-echo               ******************************************************************************
+timeout 1 >nul
+del %rootPath%updater.bat
 GOTO END
 :: ***************************************************************************************************************************************
 :: ***************************************************************************************************************************************
@@ -127,7 +148,8 @@ echo     -i: install backup utility in windows registry. so you can back up any 
 echo:
 echo Backup example: Backup.bat -b "C:\Data"
 echo   It will backup folder "C:\Data"
-:END
+:EndTimeout
 timeout 2 >nul
+:END
 color
 endlocal
