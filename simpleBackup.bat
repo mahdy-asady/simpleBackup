@@ -9,7 +9,7 @@ if NOT "%1" == "-u" (
 )
 setlocal
 :: Set the path of backup files. the below line MUST BE at line 4. the installer will change its content
-SET backupBankFolder=D:\Backup
+SET backupBankFolder=d:\back2
 :: get folder of this batch file. it is used to create temporary files and spinner batch file
 SET rootPath=%~dp0
 :: process arguments
@@ -119,7 +119,7 @@ if not exist %tempBankFolder%\ (
 :: add to Registry
 reg add HKCR\Directory\shell\Backup /v icon /f /d "%%systemroot%%\system32\setupapi.dll,46">NUL
 reg add HKCR\Directory\shell\Backup\command /ve /f /d "%~f0 -b ""%%1""">NUL
-:: edit line 9 of current batch file
+:: edit line 12 of current batch file
 :: content of updater batch file
 (
   echo @echo off
@@ -127,7 +127,7 @@ reg add HKCR\Directory\shell\Backup\command /ve /f /d "%~f0 -b ""%%1""">NUL
   echo set /A i=0
   echo for /f "delims=" %%%%f in ^('type "%%1"^^^&cd.^^^>"%%1"'^) do (
   echo   set /A i+=1
-  echo   if !i! EQU 9 ^(
+  echo   if !i! EQU 12 ^(
   echo     echo SET backupBankFolder=%tempBankFolder%^>^>%%1
   echo   ^) else ^(
   echo 	Setlocal DisableDelayedExpansion
