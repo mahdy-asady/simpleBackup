@@ -9,7 +9,7 @@ if NOT "%1" == "-u" (
 )
 setlocal
 :: Set the path of backup files. the below line MUST BE at line 4. the installer will change its content
-SET backupBankFolder=d:\back2
+SET backupBankFolder=D:\Backup
 :: get folder of this batch file. it is used to create temporary files and spinner batch file
 SET rootPath=%~dp0
 :: process arguments
@@ -56,11 +56,11 @@ if not exist %backupBankFolder%\ (
   endlocal
   GOTO EndTimeout
 )
-::create a temporary name based on current time to append to spinner and its stoper file
+::create a temporary name based on GUID append to spinner and its stoper file
 ::it enables more than one backup jobs at the same time
-set tmpfile=%time::=%
+FOR /F %%a IN ('POWERSHELL -COMMAND "$([guid]::NewGuid().ToString())"') DO ( SET tmpfile=%%a )
 set tmpfile=%tmpfile: =%
-set tmpfile=%tmpfile:.=%
+set tmpfile=%tmpfile:-=%
 :: content of spinner batch file
 (
   echo @echo off
@@ -92,6 +92,7 @@ start /b %rootPath%spinner%tmpfile%.bat
 echo "Mahdy Asady">%rootPath%stopslash%tmpfile%.dat
 :waitdel
 :: Waiting to spinner.bat to delete temporary file and exit
+pathping localhost -n -q 1 -p 200 >nul
 if exist %rootPath%stopslash%tmpfile%.dat goto waitdel
 del %rootPath%spinner%tmpfile%.bat
 TITLE SimpleBackup
